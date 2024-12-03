@@ -1,77 +1,92 @@
-// 获取画布并设置样式
 const canvas = document.getElementById("canvas");
 canvas.style.border = "2px dashed red";
 canvas.width = 500;
 canvas.height = 500;
 
-// 2D绘图上下文
 const ctx = canvas.getContext("2d");
-ctx.fillStyle = "#000"; // 填充颜色
-ctx.shadowColor = "#000"; // 阴影颜色
-ctx.shadowBlur = 2; // 阴影模糊度
+ctx.fillStyle = "#000";
+ctx.shadowColor = "#000";
+ctx.shadowBlur = 2;
 
-// 初始化树枝属性
-let radius = canvas.width / 50; // 树枝半径
+let radius = 4;
 let x = canvas.width / 2 - radius;
-let y = canvas.height; // 初始y坐标
-let angle = Math.PI / 2; // 初始角度
-let speed = canvas.width / 300; // 移动速度
+let y = canvas.height;
+let angle = Math.PI / 2;
+let speed = canvas.width / 300;
 
-// 绘制当前树枝
 function draw() {
   ctx.moveTo(x, y);
   ctx.arc(x, y, radius, 0, 2 * Math.PI, true);
   ctx.fill();
 }
 
-// 更新树枝的位置和状态
 function iterate() {
-  radius -= 0.01; // 减小半径
-  x -= radius < 9.3 ? (radius - 8.9) * 0.1 : 0.1; // 更新x坐标
-  y -= speed * Math.sin(angle); // 更新y坐标
+  radius -= 0.01;
+  x -= radius < 3.3 ? (radius - 2.9) * 0.1 : 0.1;
+  y -= speed * Math.sin(angle);
 }
 
-// 处理树枝的生命周期
 function process() {
   ctx.beginPath();
-  while(radius>9) {
-    draw(); // 绘制树枝
-    iterate(); // 更新位置和状态
+  while (radius > 3) {
+    draw();
+    iterate();
   }
 }
 
-// 动画循环
+function init() {
+  radius = 4;
+  x = canvas.width / 2 - radius;
+  y = canvas.height;
+}
+
+let leafAngle = 0;
+let leafAngleStep = -1;
+let leafAngleBase = Math.PI / 180;
 function animate() {
+  init();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   process();
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(leafAngle * leafAngleBase);
+  if (leafAngle <= -10) {
+    leafAngleStep = 1;
+  } else if (leafAngle >= 10) {
+    leafAngleStep = -1;
+  }
+  leafAngle += leafAngleStep;
   addLeftLeaf();
   addRightLeaf();
+  ctx.restore();
+  requestAnimationFrame(animate);
 }
 
 function addRightLeaf() {
-  // 开始路径
   ctx.beginPath();
-  ctx.arc(x, y - 50, 50, 0, Math.PI / 2, false);
-  ctx.arc(x + 50, y, 50, Math.PI, (3 * Math.PI) / 2, false);
+  ctx.moveTo(0, 0);
+  ctx.bezierCurveTo(0, -30, 10, -45, 50, -50);
+  ctx.bezierCurveTo(45, -10, 30, 0, 0, 0);
+  ctx.lineWidth = 5;
   ctx.fillStyle = "#8cce7f";
-  ctx.fill();
-  ctx.lineTo(x, y);
-  ctx.lineWidth = 2;
   ctx.strokeStyle = "blue";
+  ctx.fill();
+  ctx.quadraticCurveTo(23, -28, 35, -30);
   ctx.stroke();
 }
 
 function addLeftLeaf() {
-  // 开始路径
   ctx.beginPath();
-  ctx.arc(x, y - 50, 50, Math.PI / 2, Math.PI, false);
-  ctx.arc(x - 50, y, 50, (3 * Math.PI) / 2, 2 * Math.PI, false);
+  ctx.moveTo(0, 0);
+  ctx.bezierCurveTo(0, -30, -10, -45, -50, -50);
+  ctx.bezierCurveTo(-45, -10, -30, 0, 0, 0);
+  ctx.closePath();
+  ctx.lineWidth = 5;
   ctx.fillStyle = "#8cce7f";
+  ctx.strokeStyle = "blue";
   ctx.fill();
-  ctx.lineTo(x - 50, y - 50);
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = "red";
+  ctx.quadraticCurveTo(-23, -28, -35, -30);
   ctx.stroke();
 }
 
-// 开始动画
 animate();
