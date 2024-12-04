@@ -22,12 +22,23 @@ function draw() {
 
 function iterate() {
   radius -= 0.01;
+
   x -= radius < 3.3 ? (radius - 2.9) * 0.1 : 0.1;
+  x += offset;
   y -= speed * Math.sin(angle);
 }
 
+let offset = 0;
+let offsetStep = 0.005;
 function process() {
   ctx.beginPath();
+  if (offset <= -0.1) {
+    offsetStep = 0.005;
+  } else if (offset >= 0.1) {
+    offsetStep = -0.005;
+  }
+  offset += offsetStep;
+  x += offset;
   while (radius > 3) {
     draw();
     iterate();
